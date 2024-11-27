@@ -1,23 +1,21 @@
 const mongoose = require('mongoose');
 const csvtojson = require('csvtojson');
 
-// MongoDB Connection String
-const MONGO_URI = "mongodb+srv://vgangula:4hQkpmzfPrkdrEV2@cleanenergy.awuux.mongodb.net/";
-
-// Connect to MongoDB
-mongoose.connect(MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-.then(() => console.log("Connected to MongoDB"))
-.catch(err => console.error("Error connecting to MongoDB:", err));
+// MongoDB Connection
+mongoose
+  .connect(process.env.MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => console.log('Connected to MongoDB on DigitalOcean'))
+  .catch((err) => console.error('Failed to connect to MongoDB:', err));
 
 // Define a schema for the collection
 const MineralSchema = new mongoose.Schema({
   Entity: String,
   Code: String,
   Year: Number,
-  ShareOfGlobalProduction: Number
+  ShareOfGlobalProduction: Number,
 });
 
 // Create a model for the collection
@@ -31,17 +29,22 @@ csvtojson()
   .fromFile(csvFilePath)
   .then(async (jsonArray) => {
     try {
-      // Preprocess the JSON array to parse `Tonnes` as float
+      // Preprocess the JSON array
       const processedData = jsonArray.map((row) => ({
-        ...row,
-        ShareOfGlobalProduction: parseFloat(row['share of global production|Bauxite|Mine|tonnes'])
+        Entity: row['Entity'],
+        Code: row['Code'],
+        Year: parseInt(row['Year'], 10),
+        ShareOfGlobalProduction: parseFloat(row['share of global production|Bauxite|Mine|tonnes']),
       }));
 
-      console.log(processedData);
+      const batchSize = 500; // Insert in smaller batches
+      for (let i = 0; i < processedData.length; i += batchSize) {
+        const batch = processedData.slice(i, i + batchSize);
+        await Mineral.insertMany(batch);
+        console.log(`Batch ${i / batchSize + 1} inserted successfully`);
+      }
 
-      // Insert JSON records into MongoDB
-      const result = await Mineral.insertMany(processedData);
-      console.log("Data successfully uploaded to MongoDB:", result);
+      console.log("Data successfully uploaded to MongoDB");
     } catch (error) {
       console.error("Error uploading data:", error);
     } finally {
