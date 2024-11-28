@@ -6,7 +6,7 @@ import { Observable, BehaviorSubject } from 'rxjs';
   providedIn: 'root'
 })
 export class AuthService {
-  private baseUrl = 'http://157.230.190.101:3000'; // Point to the backend with a proxy or direct path
+  private baseUrl = 'https://oyster-app-q8wrn.ondigitalocean.app'; // Point to the backend with a proxy or direct path
   private tokenKey = 'jwtToken';
   private nameKey = 'name';
   private isLoggedInSubject = new BehaviorSubject<boolean>(this.isLoggedIn());
