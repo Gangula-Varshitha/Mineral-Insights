@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose'); // Import mongoose
 const jwt = require('jsonwebtoken'); // Import JWT
 const cors = require('cors');
+const bcrypt = require('bcrypt');
 const compression = require('compression');
 const bodyParser = require('body-parser');
 const nodemailer = require('nodemailer'); // Import Nodemailer
@@ -35,6 +36,20 @@ const userSchema = new mongoose.Schema({
     Year: Number,
     ShareOfGlobalProduction: Number
   });
+
+
+// Hash password before saving it to the database
+userSchema.pre('save', async function (next) {
+  if (!this.isModified('password')) return next();
+
+  try {
+    const salt = await bcrypt.genSalt(10); // generate a salt
+    this.password = await bcrypt.hash(this.password, salt); // hash password
+    next();
+  } catch (err) {
+    next(err);
+  }
+});
   
   // Create a model for the collection
   const Mineral = mongoose.model("Mineral", MineralSchema);
@@ -66,6 +81,13 @@ const userSchema = new mongoose.Schema({
   app.post('/users/signup', async (req, res) => {
     const { name, email, password, phoneNumber } = req.body;
     try {
+
+      const userExists = await User.findOne({ email });
+      if (userExists) {
+        return res.status(400).json({ message: 'User already exists' });
+      }
+
+
       const newUser = new User({ name, email, password, phoneNumber });
       await newUser.save();
       const token = jwt.sign({ userId: newUser._id }, secretkey, { expiresIn: '5m' });
@@ -88,6 +110,8 @@ const userSchema = new mongoose.Schema({
   
       res.status(200).json({ success: true, token, userId: newUser._id, name });
     } catch (err) {
+      console.log("eROR NOW ");
+      console.log(err);
       if (err.code === 11000) {
         res.status(400).json({ success: false, message: 'Email already taken' });
       } else {
@@ -105,8 +129,9 @@ const userSchema = new mongoose.Schema({
         res.status(200).json({ success: true, token, userId: 'Varshitha', name: 'Varshitha' });
       }
       else{
-        const user = await User.findOne({ email, password });
-        if (!user) {
+        const user = await User.findOne({ email });
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
           return res.status(400).json({ success: false, message: 'Invalid email or password' });
         }
         const token = jwt.sign({ userId: user._id }, secretkey, { expiresIn: '5m' });
@@ -140,6 +165,10 @@ const userSchema = new mongoose.Schema({
     });
   };
   
+  app.get('/', authenticateToken, async (req, res) => {
+    res.status(200).json({ success: true });
+  });
+
   
   app.get('/chart/bauxite-production', authenticateToken, async (req, res) => {
     try {
