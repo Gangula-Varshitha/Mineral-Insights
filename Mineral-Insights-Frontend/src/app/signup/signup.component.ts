@@ -50,8 +50,12 @@ export class SignupComponent {
           this.router.navigate(['/dashboard']);
         },
         (error) => {
-          console.error('Signup failed', error);
-          alert('Signup failed, please check the details and try again');
+          if( error.error.message == 'User already exists' ){
+            alert( 'Email already exists please login' );
+          }
+          else{
+            alert('Signup failed, please check the details and try again');
+          }
         }
       );
     }

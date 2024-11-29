@@ -6,7 +6,7 @@ import { Observable, BehaviorSubject } from 'rxjs';
   providedIn: 'root'
 })
 export class AuthService {
-  private baseUrl = 'https://oyster-app-q8wrn.ondigitalocean.app'; // Point to the backend with a proxy or direct path
+  private baseUrl = 'http://localhost:3000'; // Point to the backend with a proxy or direct path
   private tokenKey = 'jwtToken';
   private nameKey = 'name';
   private isLoggedInSubject = new BehaviorSubject<boolean>(this.isLoggedIn());
@@ -17,9 +17,15 @@ export class AuthService {
   constructor(private http: HttpClient) {}
 
   signup(formData: any): Observable<any> {
-    console.log( formData );
     return this.http.post(`${this.baseUrl}/users/signup`, formData);
   }
+  
+  checkIsUserLoggedIn() {
+    const token = localStorage.getItem( this.tokenKey ); // Retrieve JWT token
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.get(`${this.baseUrl}/`, { headers });
+  }
+
 
   // Method to get data from the backend
   getData(endpoint: string): Observable<any> {

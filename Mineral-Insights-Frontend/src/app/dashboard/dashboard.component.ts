@@ -22,6 +22,14 @@ export class DashboardComponent implements OnInit {
     if (token) {
       const name = localStorage.getItem('name');
       this.userName = name || 'User'; // Default to 'User' if name isn't in token
+      this.authService.checkIsUserLoggedIn().subscribe((response: any) => {
+        console.log(response);
+      },
+      (error: any) => {
+        alert("You have been logged out");
+        this.authService.logout();
+        this.router.navigate(['/login']);
+      });
     } else {
       this.router.navigate(['/login']); // Redirect to login if no token
     }

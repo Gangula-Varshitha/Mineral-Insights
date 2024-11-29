@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Chart, registerables } from 'chart.js';
 import { AuthService } from '../services/auth.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-summary',
@@ -8,7 +9,7 @@ import { AuthService } from '../services/auth.service';
   styleUrls: ['./summary.component.css']
 })
 export class SummaryComponent implements OnInit {
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService, private router: Router) {}
 
   ngOnInit(): void {
     Chart.register(...registerables);
@@ -54,8 +55,10 @@ export class SummaryComponent implements OnInit {
           });
         }
       },
-      (error) => {
-        console.error("Error loading bauxite production chart:", error);
+      (error: any) => {
+        alert("You have been logged out");
+        this.authService.logout();
+        this.router.navigate(['/login']);
       }
     );
   }
