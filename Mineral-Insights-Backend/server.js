@@ -97,7 +97,7 @@ userSchema.pre('save', async function (next) {
         from: process.env.EMAIL_SENDER,
         to: email,
         subject: 'Welcome to Mineral Insights',
-        text: `Hello ${name},\n\nWelcome to Mineral Insights. You have successfully signed up.\n\nRegards,\nThe Minerak Insights Team`,
+        text: `Hello ${name},\n\nWelcome to Mineral Insights. You have successfully signed up.\n\nRegards,\nThe Mineral Insights Team`,
       };
   
       transporter.sendMail(mailOptions, (error, info) => {
