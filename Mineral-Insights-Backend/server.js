@@ -6,7 +6,7 @@ const bcrypt = require('bcryptjs');
 const compression = require('compression');
 const bodyParser = require('body-parser');
 const nodemailer = require('nodemailer'); // Import Nodemailer
-const secretkey = "expense-tracker-nbad";
+const secretkey = "mineral-insights-nbad";
 require('dotenv').config();
 
 const app = express();
