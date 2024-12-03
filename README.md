@@ -15,6 +15,8 @@ Open [http://localhost:80](http://localhost:80) to view it in your browser.
 
 In the backend project directory, you can run:
 
+First to load the data use the command: ### `node loaddata.js` which loads the data to mongodb.
+
 ### `npm start`
 
 Runs the app in the development mode.\
